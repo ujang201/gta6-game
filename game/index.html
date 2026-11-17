@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solmar Bay — An Open-World Crime Game</title>
+<link rel="stylesheet" href="./style.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three.module.min.js"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="game-canvas"></canvas>
+
+<div id="hud" class="hidden">
+  <div id="minimap-wrap">
+    <canvas id="minimap" width="168" height="168"></canvas>
+    <div id="objective"></div>
+  </div>
+  <div id="top-right">
+    <div id="stars"></div>
+    <div id="cash">$250</div>
+    <div id="ammo"></div>
+  </div>
+  <div id="bottom-left">
+    <div id="health-bar"><div id="health-fill"></div><span id="health-text">100 HP</span></div>
+    <div id="car-name"></div>
+    <div id="speed"></div>
+  </div>
+  <div id="banner"></div>
+  <div id="feed"></div>
+  <div id="controls-hint">WASD move &middot; Mouse look &middot; Shift run &middot; E enter/exit car &middot; F punch &middot; Click/Space shoot &middot; M mission &middot; P pause</div>
+</div>
+
+<div id="start-menu" class="menu">
+  <h1 class="game-title">SOLMAR BAY</h1>
+  <p class="tagline">Five jobs. One crew. One sunset city.</p>
+  <p class="story">Leo Marin came to Solmar Bay to drive — just drive. But the Marlin Crew
+  pays better than any taxi stand, and Rosa the fixer has five jobs with his
+  name on them. Steal the cars. Lose the cops. Take the money and run.</p>
+  <div class="menu-buttons">
+    <button id="new-game-btn">▶ New Game</button>
+    <button id="continue-btn">↻ Continue</button>
+    <button id="mute-btn">🔊 Sound: On</button>
+  </div>
+  <p id="next-job" class="next-job"></p>
+  <div class="controls-box">
+    <h3>How to play</h3>
+    <ul>
+      <li><b>WASD</b> — walk / drive &nbsp; <b>Mouse</b> — look around (drag or click to lock)</li>
+      <li><b>Shift</b> — run &nbsp; <b>E</b> — steal / enter a car, E again to step out</li>
+      <li><b>Space</b> — handbrake (driving) / shoot (on foot) &nbsp; <b>Click</b> — shoot</li>
+      <li><b>F</b> — punch &nbsp; <b>M</b> — start the next job &nbsp; <b>P / Esc</b> — pause</li>
+      <li>Drive into a blue <b>Pay-N-Spray</b> bay to lose the cops ($100). Rest at the green safehouse to heal.</li>
+    </ul>
+  </div>
+</div>
+
+<div id="pause-menu" class="menu hidden">
+  <h1>PAUSED</h1>
+  <p class="tagline">Solmar Bay waits for no one. Except now.</p>
+  <div class="menu-buttons">
+    <button id="resume-btn">▶ Resume</button>
+    <button id="quit-btn">💾 Save &amp; Quit to Menu</button>
+  </div>
+</div>
+
+<div id="briefing" class="hidden"></div>
+<div id="end-screen" class="hidden"></div>
+<div id="error-box"></div>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
