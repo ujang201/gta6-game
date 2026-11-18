@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Solmar Bay — Make GTA 6</title>
+<title>SOLMAR BAY — a GTA-style open world</title>
 <link rel="stylesheet" href="style.css">
 <script type="importmap">
 {
@@ -14,76 +14,8 @@
 </script>
 </head>
 <body>
-<div id="game"></div>
-<div id="error-box"></div>
-<div id="hurt"></div>
-
-<div id="hud" class="hidden">
-  <div id="minimap-box">
-    <canvas id="minimap" width="150" height="150"></canvas>
-    <div id="minimap-label">N</div>
-    <div id="objective-text"></div>
-  </div>
-  <div id="top-right">
-    <div id="stars">☆☆☆☆☆</div>
-    <div id="cash">$250</div>
-    <div id="ammo">🔫 24</div>
-  </div>
-  <div id="objective-banner"><div id="objective-title"></div></div>
-  <div id="feed"></div>
-  <div id="bottom-left">
-    <div id="health-bar"><div id="health-fill"></div><span id="health-text">100 HP</span></div>
-    <div id="car-name"></div>
-    <div id="speed">0 km/h</div>
-  </div>
-  <div id="hint">WASD move · Mouse look · Shift run · E enter/exit car · F punch · Click/Space shoot · M mission · P pause</div>
-</div>
-
-<div id="menu" class="overlay">
-  <h1>SOLMAR BAY</h1>
-  <p class="tagline">Five jobs. One crew. One sunset city.</p>
-  <p class="story">Leo Marin came to Solmar Bay to drive — just drive. But the Marlin Crew pays
-  better than any taxi stand, and Rosa the fixer has five jobs with his name on
-  them. Steal the cars. Lose the cops. Take the money and run.</p>
-  <button id="btn-new" class="big-btn">▶ New Game</button>
-  <button id="btn-continue" class="big-btn hidden">Continue</button>
-  <button id="btn-sound" class="big-btn">🔊 Sound: On</button>
-  <div class="howto">
-    <h3>How to play</h3>
-    <p><b>WASD</b> — walk / drive &nbsp; <b>Mouse</b> — look around (drag or click to lock)</p>
-    <p><b>Shift</b> — run &nbsp; <b>E</b> — steal / enter a car, E again to step out</p>
-    <p><b>Space</b> — handbrake (driving) / shoot (on foot) &nbsp; <b>Click</b> — shoot</p>
-    <p><b>F</b> — punch &nbsp; <b>M</b> — start the next job &nbsp; <b>P / Esc</b> — pause</p>
-    <p>Drive into a blue <b>Pay-N-Spray</b> bay to lose the cops ($100). Rest at the green safehouse to heal.</p>
-  </div>
-</div>
-
-<div id="pause" class="overlay hidden">
-  <h1>PAUSED</h1>
-  <p class="story">Take a breath, Leo. The city will wait.</p>
-  <button id="btn-resume" class="big-btn">▶ Resume</button>
-  <button id="btn-quit" class="big-btn">Save &amp; Quit to Menu</button>
-</div>
-
-<div id="busted" class="overlay hidden">
-  <h1>BUSTED</h1>
-  <p class="story">The SBPD finally got their hands on you. Bail and a fine — $150 lighter.</p>
-  <button id="btn-busted-ok" class="big-btn">Walk Free</button>
-</div>
-
-<div id="wasted" class="overlay hidden">
-  <h1>WASTED</h1>
-  <p class="story">Leo wakes up in the hospital, $100 lighter and twice as stubborn.</p>
-  <button id="btn-wasted-ok" class="big-btn">Get Up</button>
-</div>
-
-<div id="complete" class="overlay hidden">
-  <h1>CREW COMPLETE</h1>
-  <p class="story">Five jobs. Five paydays. The Marlin Crew owns Solmar Bay tonight —
-  and Leo Marin is driving off into the sunset a rich man.</p>
-  <button id="btn-complete-ok" class="big-btn">Keep Roaming</button>
-</div>
-
-<script type="module" src="./src/main.js"></script>
+<canvas id="game"></canvas>
+<div id="hud"></div>
+<script type="module" src="src/main.js"></script>
 </body>
 </html>
