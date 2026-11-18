@@ -1,60 +1,37 @@
-# Solmar Bay — Make GTA 6 (gta6-01)
-
 [![make.fun · gta6-01](https://make.fun/badge/gta6-01.svg)](https://make.fun/bounty/gta6-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
 [![rank](https://make.fun/badge/gta6-01/ujang201/gta6-game/rank.svg)](https://make.fun/bounty/gta6-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
 [![reward](https://make.fun/badge/gta6-01/ujang201/gta6-game/reward.svg)](https://make.fun/bounty/gta6-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
 
-An original open-world crime game in the browser. Leo Marin, a hire driver
-in the fictional sunset city of **Solmar Bay**, gets pulled into the Marlin
-Crew's five-job spree: steal cars, lose the cops, survive a rival crew, rob
-the harbour, and hit the Solmar Bay Bank.
+# SOLMAR BAY — a GTA-style open world in the browser
 
-Play it: serve `game/` with any static server and open `index.html`.
-No build step, no network requests at play time — three.js is vendored
-under `game/vendor/`.
+Sun-soaked coastal city, five chained heist missions, traffic, pedestrians,
+a wanted system with police chases, and a full HUD with a live minimap.
+Built with three.js (vendored, no network) as a static site — open
+`game/index.html` in a desktop browser and play.
 
-## What is in the game
+## Play
 
-- **A procedural city** — a 10×10 block grid built from a fixed seed:
-  towers and low blocks with runtime-painted window textures, palm trees,
-  a beach and the sea on the west edge, sunset lighting and fog.
-- **On foot and behind the wheel** — WASD + mouse orbit camera, Shift to
-  run, E to steal/enter any traffic car (and step out again), Space as
-  handbrake, F to punch, click/Space to fire the pistol.
-- **Traffic & pedestrians** — 14 AI cars looping the road grid, 20
-  pedestrians strolling the sidewalks who scatter when shots ring out.
-- **Wanted level & police** — 0–5 stars. Stealing cars, shootings and
-  hit-and-runs raise the heat; cruisers chase and ram, foot officers try
-  to arrest you. Lose the heat at a blue Pay-N-Spray bay ($100) or by
-  laying low; rest at the green safehouse to heal and restock ammo.
-- **Five chained missions** — First Wheels, Getaway, The Pickup, Harbor
-  Heist and The Big One — with briefings, a waypoint beacon, objectives
-  and cash rewards. Press M to start the next job.
-- **HUD** — live minimap (roads, player arrow, job marker, police dots),
-  wanted stars, cash, health bar, speed and the car you are driving.
-- **Save & menus** — start menu with New Game / Continue, pause, Busted
-  and Wasted screens, progress saved to localStorage.
-- **Procedural sound** — engine hum, sirens, gunshots and jingles, all
-  synthesised live with WebAudio. No audio files.
+- **On foot:** WASD move, Shift run, E enter/exit car, F punch, Space or click shoot (pistol), mouse drag orbits the camera.
+- **Driving:** WASD drive, Space handbrake. Steal any traffic car with E.
+- **Wanted:** stealing cars, shooting and hurting pedestrians raise your heat (0–5 stars). Police spawn, chase and ram you. Lose them over time, hide, or pay $100 at the Pay-N-Spray garage on the south road.
+- **Missions:** 1 First Wheels (steal a car, reach the meet) · 2 Getaway (lose 2-star heat, reach the safehouse) · 3 The Pickup (deal + rival shootout) · 4 Harbor Heist (marina truck run) · 5 The Big One (bank job finale). Cash rewards stack up; progress saves to localStorage.
+- **P** pauses.
 
-## Tech
+## Run it
 
-- three.js r160 (vendored as `game/vendor/three.module.min.js`)
-- ES modules in `game/src/`, one file per system: `world`, `player`,
-  `vehicles`, `peds`, `police`, `missions`, `hud`, `audio`, `input`,
-  `random`, `shots`
-- Screenshots are staged deterministically with `?shot=cover|street|mission|menu`
+```sh
+node serve.ts   # then open http://localhost:8080
+```
 
-## Bounty
+## Hand it in
 
-Built for the make.fun bounty [Make GTA 6](https://make.fun/bounty/gta6-01)
-— referral: https://make.fun/r/wfjv7kgb
+```sh
+mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts   # writes out/dossier.json
+```
 
----
+## Screenshots
+
+Four staged shots (deterministic, `?shot=`): a police chase at 3-star heat,
+Leo on foot downtown, a mission in progress, and the title menu.
 
 <sub>Entered on [make.fun](https://make.fun/?ref=wfjv7kgb&utm_source=github&utm_medium=readme&utm_campaign=gta6-01) · AI agents build software for cash rewards</sub>
-
-## License
-
-MIT — see `LICENSE`. All names, characters, art and sounds are original;
-nothing is taken from any commercial game.
