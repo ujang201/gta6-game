@@ -1,137 +1,59 @@
-/* style.css — Solmar Bay presentation: sunset palette, heavy type, glassy HUD. */
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-html, body {
-  width: 100%; height: 100%; overflow: hidden;
-  background: #1a1026;
-  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-  color: #fff;
-}
-
-#game-canvas { display: block; width: 100vw; height: 100vh; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; overflow: hidden; background: #1a0f1e;
+  font-family: 'Segoe UI', system-ui, sans-serif; color: #fff; }
+#game, #game canvas { position: fixed; inset: 0; }
+#error-box { position: fixed; top: 0; left: 0; right: 0; z-index: 60;
+  background: #a00; color: #fff; font: 13px monospace; padding: 4px 8px;
+  display: none; }
+#error-box:not(:empty) { display: block; }
+#hurt { position: fixed; inset: 0; pointer-events: none; z-index: 20;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(200,0,0,0.7) 100%);
+  opacity: 0; transition: opacity 0.25s; }
 .hidden { display: none !important; }
 
-/* ---- HUD ---- */
-#hud { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+#hud { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
+#minimap-box { position: absolute; top: 14px; left: 14px; width: 158px;
+  background: rgba(8, 8, 16, 0.72); border: 2px solid rgba(255,255,255,0.25);
+  border-radius: 10px; padding: 4px; }
+#minimap { display: block; width: 150px; height: 150px; }
+#minimap-label { position: absolute; top: 6px; left: 8px; font-size: 11px; color: #fff; }
+#objective-text { font-size: 12px; color: #ffd94a; padding: 4px 2px 2px; min-height: 30px; }
+#top-right { position: absolute; top: 14px; right: 16px; text-align: right; }
+#stars { font-size: 26px; letter-spacing: 2px; color: #666; text-shadow: 0 0 6px #000; }
+#stars.hot { color: #ffd94a; }
+#cash { font-size: 26px; font-weight: 800; color: #7dff9a; text-shadow: 0 2px 4px #000; }
+#ammo { font-size: 16px; color: #ffd94a; text-shadow: 0 1px 3px #000; }
+#objective-banner { position: absolute; top: 60px; left: 50%; transform: translateX(-50%);
+  text-align: center; }
+#objective-title { font-size: 40px; font-weight: 900; letter-spacing: 4px; color: #ffd94a;
+  text-shadow: 0 3px 0 #7a2d00, 0 6px 14px #000; }
+#feed { position: absolute; left: 16px; bottom: 150px; font-size: 14px;
+  color: #ffe9a0; text-shadow: 0 1px 3px #000; line-height: 1.5; }
+#bottom-left { position: absolute; left: 16px; bottom: 52px; }
+#health-bar { position: relative; width: 220px; height: 20px; background: rgba(0,0,0,0.6);
+  border: 1px solid #fff3; border-radius: 10px; overflow: hidden; }
+#health-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #ff5a3c, #ff8a5c);
+  transition: width 0.2s; }
+#health-text { position: absolute; inset: 0; text-align: center; font-size: 12px;
+  line-height: 20px; font-weight: 700; }
+#car-name { font-size: 15px; color: #9fd4ff; text-shadow: 0 1px 3px #000; margin-top: 4px; }
+#speed { font-size: 24px; font-weight: 800; text-shadow: 0 2px 4px #000; }
+#hint { position: absolute; bottom: 10px; right: 14px; font-size: 12px; color: #ddd;
+  text-shadow: 0 1px 3px #000; }
 
-#minimap-wrap {
-  position: absolute; top: 14px; left: 14px;
-  background: rgba(10, 10, 18, 0.55);
-  border: 2px solid rgba(255, 255, 255, 0.35);
-  border-radius: 10px; padding: 6px;
-}
-#minimap { display: block; border-radius: 6px; }
-#objective {
-  margin-top: 6px; max-width: 168px;
-  font-size: 12px; font-weight: 600; line-height: 1.35;
-  color: #ffd23d; text-shadow: 0 1px 3px #000;
-}
-
-#top-right { position: absolute; top: 14px; right: 18px; text-align: right; }
-#stars { font-size: 26px; letter-spacing: 2px; text-shadow: 0 2px 4px #000; }
-#stars .star { color: rgba(255, 255, 255, 0.25); }
-#stars .star.lit { color: #ffd23d; }
-#cash {
-  font-size: 30px; font-weight: 800; color: #7cfc98;
-  text-shadow: 0 2px 4px #000;
-}
-#ammo { font-size: 15px; font-weight: 700; color: #ffd98a; text-shadow: 0 1px 3px #000; }
-
-#bottom-left { position: absolute; left: 18px; bottom: 16px; }
-#health-bar {
-  position: relative; width: 220px; height: 20px;
-  background: rgba(0, 0, 0, 0.6); border: 2px solid rgba(255, 255, 255, 0.4);
-  border-radius: 10px; overflow: hidden;
-}
-#health-fill {
-  height: 100%; width: 100%;
-  background: linear-gradient(90deg, #e33, #ff7a4d);
-  transition: width 0.2s;
-}
-#health-text {
-  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700; text-shadow: 0 1px 2px #000;
-}
-#car-name { margin-top: 6px; font-size: 15px; font-weight: 700; color: #9fd8ff; text-shadow: 0 1px 3px #000; }
-#speed { font-size: 22px; font-weight: 800; text-shadow: 0 2px 4px #000; }
-
-#banner {
-  position: absolute; top: 16%; left: 50%; transform: translateX(-50%);
-  text-align: center; opacity: 0; transition: opacity 0.3s;
-  text-shadow: 0 3px 8px #000;
-}
-#banner.show { opacity: 1; }
-#banner .banner-title { font-size: 44px; font-weight: 900; letter-spacing: 3px; color: #ffd23d; }
-#banner .banner-sub { font-size: 18px; font-weight: 600; color: #fff; }
-
-#feed {
-  position: absolute; left: 18px; bottom: 120px;
-  font-size: 13px; font-weight: 600; line-height: 1.5;
-  text-shadow: 0 1px 3px #000; color: #ffe9b0;
-}
-#controls-hint {
-  position: absolute; bottom: 10px; right: 16px;
-  font-size: 11px; color: rgba(255, 255, 255, 0.65); text-shadow: 0 1px 2px #000;
-}
-
-/* ---- Menus ---- */
-.menu {
-  position: fixed; inset: 0; z-index: 10;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  background: linear-gradient(180deg, rgba(26, 10, 40, 0.55), rgba(60, 20, 10, 0.72));
-  text-align: center; padding: 20px;
-}
-.game-title {
-  font-size: 84px; font-weight: 900; letter-spacing: 10px;
-  background: linear-gradient(180deg, #ffe9a8, #ff7e4d 60%, #ff5da2);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-  text-shadow: 0 6px 30px rgba(255, 110, 60, 0.45);
-}
-.tagline { font-size: 20px; font-weight: 700; color: #ffd23d; margin: 6px 0 14px; }
-.story { max-width: 560px; font-size: 15px; line-height: 1.55; color: #f2e8dc; margin-bottom: 22px; }
-.menu-buttons { display: flex; flex-direction: column; gap: 12px; width: 280px; }
-.menu-buttons button {
-  padding: 13px 20px; font-size: 17px; font-weight: 800; letter-spacing: 1px;
-  color: #fff; background: linear-gradient(180deg, #ff7e4d, #d94f3d);
-  border: 2px solid rgba(255, 255, 255, 0.5); border-radius: 10px; cursor: pointer;
-}
-.menu-buttons button:hover { filter: brightness(1.15); transform: scale(1.02); }
-.next-job { margin-top: 16px; font-size: 14px; color: #9fd8ff; font-weight: 600; }
-.controls-box {
-  margin-top: 26px; max-width: 600px; text-align: left;
-  background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 10px; padding: 14px 20px;
-}
-.controls-box h3 { color: #ffd23d; margin-bottom: 8px; font-size: 15px; }
-.controls-box li { font-size: 13px; line-height: 1.7; list-style: none; }
-.controls-box b { color: #ffd98a; }
-
-/* ---- Briefing / end screens ---- */
-#briefing {
-  position: fixed; z-index: 12; top: 50%; left: 50%; transform: translate(-50%, -50%);
-  width: 520px; max-width: 90vw; padding: 28px 30px;
-  background: rgba(12, 10, 22, 0.92); border: 2px solid #ffd23d; border-radius: 14px;
-  box-shadow: 0 10px 60px rgba(0, 0, 0, 0.7);
-}
-#briefing h2 { color: #ffd23d; font-size: 30px; margin-bottom: 4px; }
-#briefing .giver { color: #9fd8ff; font-weight: 700; margin-bottom: 12px; }
-#briefing p { line-height: 1.55; margin-bottom: 10px; }
-#briefing .reward { color: #7cfc98; font-weight: 800; font-size: 17px; }
-#briefing .hint { color: #aaa; font-size: 13px; text-align: center; margin-top: 16px; }
-
-#end-screen {
-  position: fixed; inset: 0; z-index: 12;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  background: rgba(10, 0, 0, 0.55); text-align: center; padding: 20px;
-}
-#end-screen h1 { font-size: 96px; font-weight: 900; letter-spacing: 12px; }
-#end-screen h1.busted { color: #5da9ff; text-shadow: 0 0 40px #2a6cff; }
-#end-screen h1.wasted { color: #ff4d4d; text-shadow: 0 0 40px #c00; }
-#end-screen p { font-size: 17px; max-width: 520px; line-height: 1.5; margin-top: 10px; }
-#end-screen .hint { color: #ccc; font-size: 14px; margin-top: 22px; }
-
-#error-box {
-  position: fixed; left: 0; bottom: 0; z-index: 99;
-  color: #ff8080; font: 12px monospace; white-space: pre-wrap;
-}
+.overlay { position: fixed; inset: 0; z-index: 30; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center;
+  background: linear-gradient(180deg, rgba(60,10,20,0.55), rgba(20,5,15,0.75)); }
+.overlay h1 { font-size: 84px; margin: 0; letter-spacing: 10px; color: #ffb37a;
+  text-shadow: 0 4px 0 #7a2d00, 0 10px 30px #000; }
+.overlay .tagline { font-size: 22px; color: #ffd94a; font-weight: 700; margin: 6px 0 18px; }
+.overlay .story { max-width: 560px; font-size: 16px; line-height: 1.6; color: #f2e8dc; margin: 0 0 24px; }
+.big-btn { display: block; width: 300px; margin: 6px 0; padding: 14px; font-size: 18px;
+  font-weight: 800; color: #fff; background: linear-gradient(180deg, #ff8a5c, #e05a2e);
+  border: 2px solid #ffd9a0; border-radius: 12px; cursor: pointer; }
+.big-btn:hover { filter: brightness(1.15); }
+.howto { margin-top: 26px; background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 12px; padding: 12px 22px; text-align: left; font-size: 14px; line-height: 1.7; }
+.howto h3 { margin: 0 0 6px; color: #ffd94a; }
+.howto p { margin: 2px 0; }
+.howto b { color: #ffd94a; }
