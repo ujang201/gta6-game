@@ -1,119 +1,94 @@
-// input.js — keyboard + mouse state for Solmar Bay.
-// One shared object: the game loop reads held keys each frame, and
-// edge-triggered actions (enter car, punch, pause) are consumed once.
+// Keyboard and mouse state for Solmar Bay. WASD moves, mouse orbits the
+// camera (drag, or click the canvas to lock the pointer), Space/Click shoot.
+export function createInput(canvas) {
+  const keys = new Set();
+  const pressed = new Set();
+  let mouseDX = 0;
+  let mouseDY = 0;
+  let clicked = false;
+  let dragging = false;
+  let lastX = 0;
+  let lastY = 0;
+  let pointerLocked = false;
 
-export class Input {
-  constructor() {
-    this.keys = new Set();
-    this.pressed = new Set(); // keys pressed since last consume
-    this.mouseDX = 0;
-    this.mouseDY = 0;
-    this.mouseDown = false;
-    this.mouseClicked = false;
-    this.dragging = false;
-    this.lastX = 0;
-    this.lastY = 0;
-    this.pointerLocked = false;
-    this.onFirstGesture = null;
-    this._gestureSeen = false;
+  function codeOf(e) {
+    return e.code;
   }
 
-  attach(canvas) {
-    this.canvas = canvas;
-    window.addEventListener('keydown', (e) => {
-      if (e.repeat) return;
-      this.keys.add(e.code);
-      this.pressed.add(e.code);
-      this.noteGesture();
-      if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
-        e.preventDefault();
-      }
-    });
-    window.addEventListener('keyup', (e) => {
-      this.keys.delete(e.code);
-    });
-    window.addEventListener('blur', () => {
-      this.keys.clear();
-    });
-    canvas.addEventListener('mousedown', (e) => {
-      this.mouseDown = true;
-      this.mouseClicked = true;
-      this.dragging = true;
-      this.lastX = e.clientX;
-      this.lastY = e.clientY;
-      this.noteGesture();
-    });
-    window.addEventListener('mouseup', () => {
-      this.mouseDown = false;
-      this.dragging = false;
-    });
-    window.addEventListener('mousemove', (e) => {
-      if (this.pointerLocked) {
-        this.mouseDX += e.movementX;
-        this.mouseDY += e.movementY;
-        return;
-      }
-      if (this.dragging) {
-        this.mouseDX += e.clientX - this.lastX;
-        this.mouseDY += e.clientY - this.lastY;
-        this.lastX = e.clientX;
-        this.lastY = e.clientY;
-      }
-    });
-    document.addEventListener('pointerlockchange', () => {
-      this.pointerLocked = document.pointerLockElement === canvas;
-    });
-    canvas.addEventListener('click', () => {
-      // Pointer lock gives the mouse-orbit camera its best feel; dragging
-      // still works when the browser refuses the lock (headless, iframes).
-      if (!this.pointerLocked && document.pointerLockElement !== canvas) {
-        try {
-          canvas.requestPointerLock();
-        } catch (e) {
-          /* drag fallback stays active */
-        }
-      }
-    });
-  }
-
-  noteGesture() {
-    if (!this._gestureSeen) {
-      this._gestureSeen = true;
-      if (this.onFirstGesture) this.onFirstGesture();
+  window.addEventListener('keydown', (e) => {
+    if (e.repeat) return;
+    keys.add(codeOf(e));
+    pressed.add(codeOf(e));
+    if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(codeOf(e))) {
+      e.preventDefault();
     }
-  }
+  });
+  window.addEventListener('keyup', (e) => {
+    keys.delete(codeOf(e));
+  });
+  window.addEventListener('blur', () => {
+    keys.clear();
+    dragging = false;
+  });
 
-  held(code) {
-    return this.keys.has(code);
-  }
+  canvas.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) return;
+    clicked = true;
+    dragging = true;
+    lastX = e.clientX;
+    lastY = e.clientY;
+    if (canvas.requestPointerLock) {
+      try {
+        canvas.requestPointerLock();
+      } catch (err) {
+        // Pointer lock is a nicety; dragging still works without it.
+      }
+    }
+  });
+  window.addEventListener('mouseup', () => {
+    dragging = false;
+  });
+  document.addEventListener('pointerlockchange', () => {
+    pointerLocked = document.pointerLockElement === canvas;
+  });
+  document.addEventListener('mousemove', (e) => {
+    if (pointerLocked) {
+      mouseDX += e.movementX || 0;
+      mouseDY += e.movementY || 0;
+    } else if (dragging) {
+      mouseDX += e.clientX - lastX;
+      mouseDY += e.clientY - lastY;
+      lastX = e.clientX;
+      lastY = e.clientY;
+    }
+  });
 
-  // True once per physical press; callers consume it each frame.
-  wasPressed(code) {
-    return this.pressed.has(code);
-  }
-
-  consumeMouse() {
-    const dx = this.mouseDX;
-    const dy = this.mouseDY;
-    this.mouseDX = 0;
-    this.mouseDY = 0;
-    const clicked = this.mouseClicked;
-    this.mouseClicked = false;
-    return { dx, dy, clicked };
-  }
-
-  endFrame() {
-    this.pressed.clear();
-  }
-
-  // Movement axes in camera space: forward +1, strafe right +1.
-  moveAxes() {
-    let f = 0;
-    let s = 0;
-    if (this.held('KeyW') || this.held('ArrowUp')) f += 1;
-    if (this.held('KeyS') || this.held('ArrowDown')) f -= 1;
-    if (this.held('KeyD') || this.held('ArrowRight')) s += 1;
-    if (this.held('KeyA') || this.held('ArrowLeft')) s -= 1;
-    return { forward: f, strafe: s };
-  }
+  return {
+    down(code) {
+      return keys.has(code);
+    },
+    // Edge-triggered: true once per physical press until the frame consumes it.
+    wasPressed(code) {
+      return pressed.has(code);
+    },
+    // Mouse movement since the last frame, in pixels.
+    takeMouse() {
+      const out = { dx: mouseDX, dy: mouseDY };
+      mouseDX = 0;
+      mouseDY = 0;
+      return out;
+    },
+    takeClick() {
+      const out = clicked;
+      clicked = false;
+      return out;
+    },
+    // Called at the end of each frame so presses do not leak into the next.
+    endFrame() {
+      pressed.clear();
+    },
+    get pointerLocked() {
+      return pointerLocked;
+    },
+  };
 }
