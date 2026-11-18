@@ -22,34 +22,20 @@ under `game/vendor/`.
   run, E to steal/enter any traffic car (and step out again), Space as
   handbrake, F to punch, click/Space to fire the pistol.
 - **Traffic & pedestrians** — 14 AI cars looping the road grid, 20
-  pedestrians strolling the sidewalks who flee gunfire.
-- **Wanted system** — 0–5 stars, police interceptors that chase and ram,
-  foot officers at high heat. Heat cools while you lay low; a blue
-  Pay-N-Spray bay clears it for $100; the safehouse heals you.
-- **Five chained story missions** with briefings, waypoint markers,
-  objectives and cash payouts: First Wheels, Getaway, The Pickup,
-  Harbor Heist, The Big One.
-- **HUD** — live canvas minimap (roads, player arrow, mission waypoint,
-  police dots, Pay-N-Spray bays, safehouse), wanted stars, cash, health,
-  speed, ammo, objective banner and message feed.
-- **Menus & save** — start menu (New Game / Continue), pause, mission
-  briefings, Busted/Wasted screens, progress saved to localStorage.
-- **Sound** — 100% procedural WebAudio: engine hum, sirens, gunshots,
-  crashes, cash and UI blips. No audio files.
-
-## Controls
-
-| Key | Action |
-| --- | --- |
-| WASD | Walk / drive |
-| Mouse (drag or click to lock) | Look around |
-| Shift | Run |
-| E | Enter / steal a car, step out |
-| Space | Handbrake (driving) / shoot (on foot) |
-| Click | Shoot |
-| F | Punch |
-| M | Start the next job |
-| P / Esc | Pause |
+  pedestrians strolling the sidewalks who scatter when shots ring out.
+- **Wanted level & police** — 0–5 stars. Stealing cars, shootings and
+  hit-and-runs raise the heat; cruisers chase and ram, foot officers try
+  to arrest you. Lose the heat at a blue Pay-N-Spray bay ($100) or by
+  laying low; rest at the green safehouse to heal and restock ammo.
+- **Five chained missions** — First Wheels, Getaway, The Pickup, Harbor
+  Heist and The Big One — with briefings, a waypoint beacon, objectives
+  and cash rewards. Press M to start the next job.
+- **HUD** — live minimap (roads, player arrow, job marker, police dots),
+  wanted stars, cash, health bar, speed and the car you are driving.
+- **Save & menus** — start menu with New Game / Continue, pause, Busted
+  and Wasted screens, progress saved to localStorage.
+- **Procedural sound** — engine hum, sirens, gunshots and jingles, all
+  synthesised live with WebAudio. No audio files.
 
 ## Tech
 
