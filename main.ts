@@ -1,14 +1,14 @@
-// Solmar Bay — a make.fun gta6-01 entry (Node 22, standard library only).
+// SOLMAR BAY — a make.fun gta6-01 entry (Node 22, standard library only).
 //
-// The playable game lives in this directory's game/ folder: plain static
-// files (index.html plus ES modules under game/src, three.js vendored as
-// game/vendor/three.module.min.js). Nothing is fetched over the network and
-// there is no build step — any static server can host it, and the grader
-// opens game/index.html in desktop Chrome.
+// The game itself is the static site in this directory's game/ folder:
+// index.html plus ES modules under game/src, with three.js vendored at
+// game/vendor/three.module.min.js. It never touches the network and has no
+// build step — any static server can host it, and the grader opens
+// game/index.html in desktop Chrome.
 //
-// This program is the handoff. It gathers game/ and screenshots/ from
-// beside this file into the output directory and writes output/dossier.json,
-// the summary the judge reads, using the vendored make.fun library.
+// This program is the handoff. It gathers game/ and screenshots/ from beside
+// this file into the output directory and writes output/dossier.json, the
+// summary the judge reads, using the vendored make.fun library.
 //
 // Run it outside the grader with:
 //   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts

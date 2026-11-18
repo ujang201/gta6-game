@@ -1,232 +1,218 @@
-// The Marlin Crew's five jobs: a chained story told through briefings,
-// waypoint beacons and cash rewards. Each mission is a list of small steps;
-// finish them all and the crew's spree is complete.
+// The 5 chained missions of SOLMAR BAY. Each mission has a title, a
+// briefing, an objective line and a target on the map. The main loop calls
+// update() every frame with the player's state; missions report events
+// (toasts) and advance when their conditions are met.
 import * as THREE from 'three';
-import { makeCarMesh } from './vehicles.js';
-import { spawnRival } from './peds.js';
+import { dist2D } from './random.js';
 
-const MISSION_DEFS = [
-  {
-    id: 'wheels',
-    title: 'FIRST WHEELS',
-    briefing: 'Rosa: Leo, we need wheels. Steal any car and bring it to the meet.',
-    reward: 250,
-    steps: [
-      { type: 'steal', text: 'Steal any car (walk up and press E)' },
-      { type: 'goto', at: 'meet', text: 'Drive to the meet point' },
-    ],
-  },
-  {
-    id: 'getaway',
-    title: 'GETAWAY',
-    briefing: 'Rosa: The cops are onto the meet. Two stars — lose them at the safehouse.',
-    reward: 400,
-    steps: [
-      { type: 'escape', text: 'Lose the heat — reach the safehouse or shake the cops' },
-    ],
-  },
-  {
-    id: 'pickup',
-    title: 'THE PICKUP',
-    briefing: 'Rosa: A deal at the docks went sour. The rival crew is waiting — handle it.',
-    reward: 600,
-    steps: [
-      { type: 'goto', at: 'deal', text: 'Drive to the deal at the docks' },
-      { type: 'shootout', text: 'Take down the rival crew (3 left)' },
-    ],
-  },
-  {
-    id: 'harbor',
-    title: 'HARBOR HEIST',
-    briefing: 'Rosa: The truck is in the harbour yard. Steal it and bring it to the drop.',
-    reward: 1200,
-    steps: [
-      { type: 'truck', text: 'Steal the cargo truck at the harbour' },
-      { type: 'deliver', at: 'drop', text: 'Deliver the truck to the drop point' },
-    ],
-  },
-  {
-    id: 'bigone',
-    title: 'THE BIG ONE',
-    briefing: 'Rosa: The bank. Grab the vault cash and get out clean — or at least get out.',
-    reward: 3000,
-    steps: [
-      { type: 'goto', at: 'bank', text: 'Reach the Solmar Bay Bank' },
-      { type: 'grab', text: 'Hold position — crack the vault' },
-      { type: 'escape', text: 'Lose the three-star heat — reach the safehouse' },
-    ],
-  },
-];
+function makeRivalMesh() {
+  const g = new THREE.Group();
+  const shirt = new THREE.MeshStandardMaterial({ color: 0x8a1a1a, roughness: 0.9 });
+  const skin = new THREE.MeshStandardMaterial({ color: 0xd8a06a, roughness: 0.9 });
+  const pants = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9 });
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.34), shirt);
+  body.position.y = 1.1;
+  g.add(body);
+  const head = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.44, 0.44), skin);
+  head.position.y = 1.75;
+  g.add(head);
+  const legs = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.7, 0.32), pants);
+  legs.position.y = 0.38;
+  g.add(legs);
+  return g;
+}
 
-export function createMissions(game) {
-  const { world, scene, player, police, hud, audio } = game;
-  // Waypoint beacon: a shaft of light, a floating diamond and a ground ring.
-  const beacon = new THREE.Group();
-  const shaft = new THREE.Mesh(
-    new THREE.CylinderGeometry(1.6, 1.6, 60, 12, 1, true),
-    new THREE.MeshBasicMaterial({ color: 0xffc93e, transparent: true, opacity: 0.35, side: THREE.DoubleSide, depthWrite: false }),
-  );
-  shaft.position.y = 30;
-  beacon.add(shaft);
-  const gem = new THREE.Mesh(
-    new THREE.OctahedronGeometry(1.6),
-    new THREE.MeshBasicMaterial({ color: 0xffd94a }),
-  );
-  gem.position.y = 9;
-  beacon.add(gem);
-  const ring = new THREE.Mesh(
-    new THREE.RingGeometry(2.2, 3.4, 28),
-    new THREE.MeshBasicMaterial({ color: 0xffd94a, transparent: true, opacity: 0.8, side: THREE.DoubleSide }),
-  );
-  ring.rotation.x = -Math.PI / 2;
-  ring.position.y = 0.15;
-  beacon.add(ring);
-  beacon.visible = false;
-  scene.add(beacon);
+export class Missions {
+  constructor(scene, world, rng) {
+    this.scene = scene;
+    this.world = world;
+    this.rng = rng;
+    const L = world.landmarks;
+    this.defs = [
+      {
+        id: 'm1', title: 'First Wheels',
+        briefing: 'Leo needs wheels. Steal a car and bring it to the meet.',
+        objective: 'Steal a car, then drive to the meet point',
+        target: L.meet, radius: 9, reward: 250,
+      },
+      {
+        id: 'm2', title: 'Getaway',
+        briefing: 'The crew is hot. Lose the heat and reach the safehouse.',
+        objective: 'Reach the safehouse (2-star heat)',
+        target: L.safehouse, radius: 10, reward: 300,
+      },
+      {
+        id: 'm3', title: 'The Pickup',
+        briefing: 'A deal at the old yard. The rival crew will not let it slide.',
+        objective: 'Go to the deal, then take out the rival crew',
+        target: L.deal, radius: 10, reward: 500,
+      },
+      {
+        id: 'm4', title: 'Harbor Heist',
+        briefing: 'A truck full of goods sits at the marina. Take it to the warehouse.',
+        objective: 'Reach the marina, then deliver a car to the warehouse',
+        target: L.marina, radius: 10, reward: 800,
+      },
+      {
+        id: 'm5', title: 'The Big One',
+        briefing: 'The bank job. Grab the cash and vanish before the city locks down.',
+        objective: 'Hit the bank, grab the cash, escape to the safehouse',
+        target: L.bank, radius: 10, reward: 1000,
+      },
+    ];
+    // delivery point for mission 4 (a warehouse block on the west side)
+    this.delivery = { x: -234, z: -182 };
+    this.index = -1; // -1 = not started
+    this.stage = 0; // 0 = go to target, 1 = second phase
+    this.rivals = [];
+    this.done = false;
+    this.events = []; // strings for the HUD to show as toasts
+    this.onReward = null; // callback(amount)
+    this.onWanted = null; // callback(stars)
+    this.onDamage = null; // callback(amount) when a rival shoots the player
+  }
 
-  const m = {
-    index: -1, // -1: no job yet; 0..4: job running; 5: all done
-    step: 0,
-    active: false,
-    grabTimer: 0,
-    rivals: [],
-    truck: null,
-    beacon,
-    def() {
-      return this.index >= 0 && this.index < MISSION_DEFS.length ? MISSION_DEFS[this.index] : null;
-    },
-    stepDef() {
-      const d = this.def();
-      return d ? d.steps[this.step] : null;
-    },
-    startNext() {
-      if (this.index >= MISSION_DEFS.length) return false;
-      this.index += 1;
-      if (this.index >= MISSION_DEFS.length) {
-        this.active = false;
-        beacon.visible = false;
-        hud.setObjective('', 'All five jobs done — Solmar Bay is yours, Leo.');
-        return false;
-      }
-      this.step = 0;
-      this.active = true;
-      this.grabTimer = 0;
-      const d = this.def();
-      hud.setObjective(d.title, d.briefing);
-      hud.feed(d.briefing);
-      audio.sting();
-      if (d.id === 'getaway') police.setWanted(2);
-      if (d.id === 'bigone') police.setWanted(0);
-      this.setupStep();
-      return true;
-    },
-    setupStep() {
-      const s = this.stepDef();
-      if (!s) return;
-      if (s.type === 'goto' || s.type === 'deliver') {
-        const spot = world.spots[s.at];
-        beacon.position.set(spot.x, 0, spot.z);
-        beacon.visible = true;
-      } else if (s.type === 'truck') {
-        if (!this.truck) {
-          const mesh = makeCarMesh(0x8a7a3e, true, false);
-          mesh.position.set(world.spots.harbor.x, 0, world.spots.harbor.z);
-          scene.add(mesh);
-          this.truck = { mesh, pos: mesh.position, heading: 0, speed: 0, stolen: false, isMissionTruck: true, name: 'Cargo Truck' };
-          game.missionTruck = this.truck;
+  start() {
+    this.index = 0;
+    this.stage = 0;
+    this.events.push('Mission 1: ' + this.defs[0].title + ' — ' + this.defs[0].briefing);
+  }
+
+  current() {
+    if (this.index < 0 || this.index >= this.defs.length) return null;
+    return this.defs[this.index];
+  }
+
+  // where the minimap marker should point right now
+  markerTarget() {
+    const cur = this.current();
+    if (!cur) return null;
+    if (this.index === 3 && this.stage === 1) return this.delivery;
+    if (this.index === 4 && this.stage === 1) return this.world.landmarks.safehouse;
+    return cur.target;
+  }
+
+  // player fired a shot from (ox,oz) along heading; returns true if a rival was hit
+  tryHitShot(ox, oz, heading) {
+    for (const r of this.rivals) {
+      if (r.hp <= 0) continue;
+      const dx = r.x - ox;
+      const dz = r.z - oz;
+      const d = Math.sqrt(dx * dx + dz * dz);
+      if (d > 34) continue;
+      // angle between the shot direction and the rival
+      const shotX = Math.cos(heading);
+      const shotZ = -Math.sin(heading);
+      const dot = (dx * shotX + dz * shotZ) / (d || 1);
+      if (dot > 0.86) {
+        r.hp -= 34;
+        if (r.hp <= 0) {
+          r.mesh.visible = false;
+          this.events.push('Rival down.');
         }
-        beacon.position.set(world.spots.harbor.x, 0, world.spots.harbor.z);
-        beacon.visible = true;
-      } else if (s.type === 'grab') {
-        beacon.position.set(world.spots.bank.x, 0, world.spots.bank.z);
-        beacon.visible = true;
-      } else if (s.type === 'shootout') {
-        this.rivals = [];
-        for (let i = 0; i < 3; i++) {
-          const r = spawnRival(world, scene, world.spots.deal.x + (i - 1) * 4, world.spots.deal.z + 6);
-          this.rivals.push(r);
-          game.peds.push(r);
-        }
-        beacon.visible = false;
-      } else {
-        beacon.visible = false;
+        return true;
       }
-      const d = this.def();
-      if (d) hud.setObjective(d.title, s.text);
-    },
-    completeStep() {
-      const d = this.def();
-      this.step += 1;
-      audio.pickup();
-      if (this.step >= d.steps.length) {
-        player.cash += d.reward;
-        hud.feed(`${d.title} complete — +$${d.reward}`);
-        audio.cash();
-        this.active = false;
-        beacon.visible = false;
-        if (d.id === 'bigone') police.setWanted(3);
-        hud.setObjective(d.title, 'Job done. Press M to start the next job.');
-      } else {
-        this.setupStep();
+    }
+    return false;
+  }
+
+  spawnRivals() {
+    const L = this.world.landmarks.deal;
+    for (let i = 0; i < 3; i++) {
+      const mesh = makeRivalMesh();
+      const x = L.x + this.rng.range(-8, 8);
+      const z = L.z + this.rng.range(-8, 8);
+      mesh.position.set(x, 0, z);
+      this.scene.add(mesh);
+      this.rivals.push({ mesh, x, z, hp: 100, shootTimer: this.rng.range(0.5, 1.5) });
+    }
+    this.events.push('Rival crew! Take them out.');
+  }
+
+  clearRivals() {
+    for (const r of this.rivals) this.scene.remove(r.mesh);
+    this.rivals = [];
+  }
+
+  completeMission() {
+    const cur = this.defs[this.index];
+    if (this.onReward) this.onReward(cur.reward);
+    this.events.push('Mission complete: ' + cur.title + ' (+$' + cur.reward + ')');
+    this.clearRivals();
+    this.index += 1;
+    this.stage = 0;
+    if (this.index >= this.defs.length) {
+      this.done = true;
+      this.events.push('THE BIG ONE — Solmar Bay is yours. All missions complete!');
+      return;
+    }
+    const next = this.defs[this.index];
+    this.events.push('Mission ' + (this.index + 1) + ': ' + next.title + ' — ' + next.briefing);
+    if (this.index === 1 && this.onWanted) this.onWanted(2);
+  }
+
+  update(dt, state) {
+    // state: {px, pz, inCar}
+    const cur = this.current();
+    if (!cur || this.done) return;
+    // rivals shoot at the player
+    for (const r of this.rivals) {
+      if (r.hp <= 0) continue;
+      r.shootTimer -= dt;
+      const d = dist2D(r.x, r.z, state.px, state.pz);
+      if (r.shootTimer <= 0 && d < 26) {
+        r.shootTimer = 1.4;
+        // face the player and fire (a tracer-less hit chance)
+        r.mesh.rotation.y = Math.atan2(-(state.pz - r.z), state.px - r.x);
+        if (this.rng.f() < 0.45 && this.onDamage) this.onDamage(6);
       }
-    },
-    waypoint() {
-      const s = this.stepDef();
-      if (!s) return null;
-      if (s.type === 'goto' || s.type === 'deliver' || s.type === 'grab') return world.spots[s.at];
-      if (s.type === 'truck') return world.spots.harbor;
-      if (s.type === 'escape') return world.spots.safehouse;
-      return null;
-    },
-    update(dt) {
-      if (!this.active) return;
-      const s = this.stepDef();
-      if (!s) return;
-      const d = this.def();
-      const px = player.pos.x;
-      const pz = player.pos.z;
-      const near = (x, z, r) => Math.hypot(px - x, pz - z) < r;
-      if (s.type === 'steal') {
-        if (!player.onFoot) this.completeStep();
-      } else if (s.type === 'goto' || s.type === 'deliver') {
-        const spot = world.spots[s.at];
-        if (near(spot.x, spot.z, s.type === 'deliver' ? 7 : 6)) {
-          if (s.type === 'deliver' && player.car !== this.truck) {
-            hud.setObjective(d.title, 'Bring the truck — not that car');
-          } else {
-            this.completeStep();
-          }
-        }
-      } else if (s.type === 'escape') {
-        if (near(world.spots.safehouse.x, world.spots.safehouse.z, 8) || police.wanted === 0) {
-          this.completeStep();
-        }
-      } else if (s.type === 'shootout') {
-        const alive = this.rivals.filter((r) => r.hp > 0).length;
-        hud.setObjective(d.title, `Take down the rival crew (${alive} left)`);
-        if (alive === 0) this.completeStep();
-      } else if (s.type === 'truck') {
-        if (player.car === this.truck) this.completeStep();
-      } else if (s.type === 'grab') {
-        if (near(world.spots.bank.x, world.spots.bank.z, 8)) {
-          this.grabTimer += dt;
-          hud.setObjective(d.title, `Cracking the vault… ${Math.ceil(3 - this.grabTimer)}s`);
-          if (this.grabTimer >= 3) {
-            player.cash += 3000;
-            hud.feed('Vault cash secured: $3,000');
-            this.completeStep();
-          }
-        } else {
-          this.grabTimer = 0;
-        }
+    }
+    if (this.index === 0) {
+      if (state.inCar && dist2D(state.px, state.pz, cur.target.x, cur.target.z) < cur.radius) {
+        this.completeMission();
       }
-      // The beacon's diamond bobs so the eye finds it. The clock is the
-      // game's own clock, frozen in screenshot staging for determinism.
-      if (beacon.visible) {
-        gem.position.y = 9 + Math.sin((this.clock || 0) * 2.8) * 0.8;
-        gem.rotation.y += dt * 1.5;
+    } else if (this.index === 1) {
+      if (dist2D(state.px, state.pz, cur.target.x, cur.target.z) < cur.radius) {
+        if (this.onWanted) this.onWanted(0);
+        this.completeMission();
       }
-    },
-  };
-  return m;
+    } else if (this.index === 2) {
+      if (this.stage === 0) {
+        if (dist2D(state.px, state.pz, cur.target.x, cur.target.z) < cur.radius) {
+          this.stage = 1;
+          this.spawnRivals();
+        }
+      } else if (this.rivals.length > 0 && this.rivals.every((r) => r.hp <= 0)) {
+        this.completeMission();
+      }
+    } else if (this.index === 3) {
+      if (this.stage === 0) {
+        if (dist2D(state.px, state.pz, cur.target.x, cur.target.z) < cur.radius) {
+          this.stage = 1;
+          this.events.push('Truck secured. Deliver a car to the warehouse (west side).');
+        }
+      } else if (state.inCar && dist2D(state.px, state.pz, this.delivery.x, this.delivery.z) < 10) {
+        this.completeMission();
+      }
+    } else if (this.index === 4) {
+      if (this.stage === 0) {
+        if (dist2D(state.px, state.pz, cur.target.x, cur.target.z) < cur.radius) {
+          this.stage = 1;
+          if (this.onReward) this.onReward(2000);
+          if (this.onWanted) this.onWanted(3);
+          this.events.push('Cash grabbed (+$2000)! The whole city is coming — reach the safehouse.');
+        }
+      } else if (dist2D(state.px, state.pz, this.world.landmarks.safehouse.x, this.world.landmarks.safehouse.z) < 10) {
+        if (this.onWanted) this.onWanted(0);
+        this.completeMission();
+      }
+    }
+  }
+
+  // drain pending toast events (HUD calls this each frame)
+  takeEvents() {
+    const out = this.events;
+    this.events = [];
+    return out;
+  }
 }

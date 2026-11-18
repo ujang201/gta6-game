@@ -1,59 +1,25 @@
-* { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; overflow: hidden; background: #1a0f1e;
-  font-family: 'Segoe UI', system-ui, sans-serif; color: #fff; }
-#game, #game canvas { position: fixed; inset: 0; }
-#error-box { position: fixed; top: 0; left: 0; right: 0; z-index: 60;
-  background: #a00; color: #fff; font: 13px monospace; padding: 4px 8px;
-  display: none; }
-#error-box:not(:empty) { display: block; }
-#hurt { position: fixed; inset: 0; pointer-events: none; z-index: 20;
-  background: radial-gradient(ellipse at center, transparent 55%, rgba(200,0,0,0.7) 100%);
-  opacity: 0; transition: opacity 0.25s; }
-.hidden { display: none !important; }
-
-#hud { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
-#minimap-box { position: absolute; top: 14px; left: 14px; width: 158px;
-  background: rgba(8, 8, 16, 0.72); border: 2px solid rgba(255,255,255,0.25);
-  border-radius: 10px; padding: 4px; }
-#minimap { display: block; width: 150px; height: 150px; }
-#minimap-label { position: absolute; top: 6px; left: 8px; font-size: 11px; color: #fff; }
-#objective-text { font-size: 12px; color: #ffd94a; padding: 4px 2px 2px; min-height: 30px; }
-#top-right { position: absolute; top: 14px; right: 16px; text-align: right; }
-#stars { font-size: 26px; letter-spacing: 2px; color: #666; text-shadow: 0 0 6px #000; }
-#stars.hot { color: #ffd94a; }
-#cash { font-size: 26px; font-weight: 800; color: #7dff9a; text-shadow: 0 2px 4px #000; }
-#ammo { font-size: 16px; color: #ffd94a; text-shadow: 0 1px 3px #000; }
-#objective-banner { position: absolute; top: 60px; left: 50%; transform: translateX(-50%);
-  text-align: center; }
-#objective-title { font-size: 40px; font-weight: 900; letter-spacing: 4px; color: #ffd94a;
-  text-shadow: 0 3px 0 #7a2d00, 0 6px 14px #000; }
-#feed { position: absolute; left: 16px; bottom: 150px; font-size: 14px;
-  color: #ffe9a0; text-shadow: 0 1px 3px #000; line-height: 1.5; }
-#bottom-left { position: absolute; left: 16px; bottom: 52px; }
-#health-bar { position: relative; width: 220px; height: 20px; background: rgba(0,0,0,0.6);
-  border: 1px solid #fff3; border-radius: 10px; overflow: hidden; }
-#health-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #ff5a3c, #ff8a5c);
-  transition: width 0.2s; }
-#health-text { position: absolute; inset: 0; text-align: center; font-size: 12px;
-  line-height: 20px; font-weight: 700; }
-#car-name { font-size: 15px; color: #9fd4ff; text-shadow: 0 1px 3px #000; margin-top: 4px; }
-#speed { font-size: 24px; font-weight: 800; text-shadow: 0 2px 4px #000; }
-#hint { position: absolute; bottom: 10px; right: 14px; font-size: 12px; color: #ddd;
-  text-shadow: 0 1px 3px #000; }
-
-.overlay { position: fixed; inset: 0; z-index: 30; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; text-align: center;
-  background: linear-gradient(180deg, rgba(60,10,20,0.55), rgba(20,5,15,0.75)); }
-.overlay h1 { font-size: 84px; margin: 0; letter-spacing: 10px; color: #ffb37a;
-  text-shadow: 0 4px 0 #7a2d00, 0 10px 30px #000; }
-.overlay .tagline { font-size: 22px; color: #ffd94a; font-weight: 700; margin: 6px 0 18px; }
-.overlay .story { max-width: 560px; font-size: 16px; line-height: 1.6; color: #f2e8dc; margin: 0 0 24px; }
-.big-btn { display: block; width: 300px; margin: 6px 0; padding: 14px; font-size: 18px;
-  font-weight: 800; color: #fff; background: linear-gradient(180deg, #ff8a5c, #e05a2e);
-  border: 2px solid #ffd9a0; border-radius: 12px; cursor: pointer; }
-.big-btn:hover { filter: brightness(1.15); }
-.howto { margin-top: 26px; background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 12px; padding: 12px 22px; text-align: left; font-size: 14px; line-height: 1.7; }
-.howto h3 { margin: 0 0 6px; color: #ffd94a; }
-.howto p { margin: 2px 0; }
-.howto b { color: #ffd94a; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #1a1420; font-family: 'Segoe UI', system-ui, sans-serif; }
+#game { display: block; width: 100vw; height: 100vh; }
+#hud { position: fixed; inset: 0; pointer-events: none; color: #fff; }
+#hud-top { position: absolute; top: 14px; left: 16px; display: flex; gap: 16px; align-items: center; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+#hud-stars { font-size: 22px; letter-spacing: 2px; color: #ffd23e; }
+#hud-stars.hot { animation: pulse 0.8s infinite alternate; }
+@keyframes pulse { from { opacity: 1; } to { opacity: 0.55; } }
+#hud-cash { font-size: 22px; font-weight: 700; color: #7dff8a; }
+#hud-health { width: 160px; height: 14px; background: rgba(0,0,0,.55); border: 1px solid rgba(255,255,255,.5); border-radius: 7px; overflow: hidden; }
+#hud-health-fill { height: 100%; width: 100%; background: #3ecf5a; }
+#hud-speed { position: absolute; right: 18px; top: 14px; font-size: 22px; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+#hud-objective { position: absolute; left: 50%; transform: translateX(-50%); top: 14px; max-width: 46vw; text-align: center; font-size: 15px; font-weight: 600; background: rgba(0,0,0,.55); padding: 7px 14px; border-radius: 8px; }
+#hud-toasts { position: absolute; left: 50%; transform: translateX(-50%); top: 64px; display: flex; flex-direction: column; gap: 6px; align-items: center; }
+.toast { background: rgba(0,0,0,.65); padding: 8px 16px; border-radius: 8px; font-size: 15px; max-width: 60vw; text-align: center; }
+#hud-hint { position: absolute; left: 50%; transform: translateX(-50%); bottom: 18px; font-size: 14px; color: #ffd23e; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+#hud-map { position: absolute; left: 16px; bottom: 16px; border: 2px solid rgba(255,255,255,.6); border-radius: 6px; background: #20242e; }
+.overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: rgba(10, 6, 18, 0.72); pointer-events: auto; text-align: center; padding: 20px; }
+.overlay.hidden { display: none; }
+.overlay h1 { font-size: 64px; letter-spacing: 6px; color: #ffd23e; text-shadow: 0 3px 0 #b3541e, 0 6px 18px rgba(0,0,0,.6); }
+.overlay .tagline { font-size: 18px; color: #fff; }
+.overlay .story { font-size: 15px; color: #d8d8d8; max-width: 520px; }
+.overlay button { pointer-events: auto; font-size: 18px; font-weight: 700; padding: 12px 34px; border: none; border-radius: 8px; background: #ffd23e; color: #231303; cursor: pointer; }
+.overlay button:hover { background: #ffdf6b; }
+.overlay .controls { font-size: 13px; color: #bbb; margin-top: 8px; }
